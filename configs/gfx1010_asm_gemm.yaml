@@ -1,0 +1,82 @@
+GlobalParameters:
+  MinimumRequiredVersion: 4.4.0
+  PrintLevel: 1
+  ForceRedoBenchmarkProblems: True
+  ForceRedoLibraryLogic: True
+  ForceRedoLibraryClient: True
+  CMakeBuildType: Release
+  EnqueuesPerSync: 10
+  SyncsPerBenchmark: 2
+  NumElementsToValidate: 256
+  ValidationMaxToPrint: 4
+  ShortNames: True
+  MergeFiles: True
+  Device: 0
+  KernelTime: True
+  PrintSolutionRejectionReason: True
+  PrintWinnersOnly: 0
+  CMakeGenerator: Ninja
+  Architecture: gfx1010
+
+# Strided-batched, UseBeta kernels for torch gemm/bgemm on gfx1010.
+# HHH = FP16 accumulate, HHS = FP32 accumulate (PyTorch default), S = FP32.
+x-common: &common
+  - KernelLanguage: ["Assembly"]
+  - WavefrontSize: [32]
+  - EdgeType: ["ShiftPtr"]
+  - LoopTail: [True]
+  - StaggerUMapping: [3]
+x-fork-h: &fork_h
+  - ThreadTile:
+    - [8, 8]
+    - [16, 8]
+  - WorkGroup:
+    - [16, 16, 1]
+    - [16, 8, 1]
+  - DepthU: [16, 32]
+  - GlobalReadVectorWidth: [8]
+  - PrefetchGlobalRead: [1, 2]
+x-fork-s: &fork_s
+  - ThreadTile:
+    - [8, 8]
+    - [16, 8]
+  - WorkGroup:
+    - [16, 16, 1]
+    - [16, 8, 1]
+  - DepthU: [8, 16]
+  - GlobalReadVectorWidth: [4]
+  - PrefetchGlobalRead: [1, 2]
+x-sizes: &sizes
+  - ProblemSizes:
+    - Exact: [1024, 1024, 1, 1024]
+    - Exact: [2048, 2048, 1, 2048]
+    - Exact: [4096, 2048, 1, 4096]
+    - Exact: [4096, 4096, 1, 4096]
+    - Exact: [1000, 1000, 1, 1000]
+    - Exact: [64, 1024, 16, 1024]
+    - Exact: [128, 8192, 1, 1024]
+
+BenchmarkProblems:
+  - - {OperationType: GEMM, DataType: h, TransposeA: False, TransposeB: False, UseBeta: True, Batched: True}
+    - {BenchmarkCommonParameters: *common, ForkParameters: *fork_h, BenchmarkFinalParameters: *sizes}
+  - - {OperationType: GEMM, DataType: h, TransposeA: True, TransposeB: False, UseBeta: True, Batched: True}
+    - {BenchmarkCommonParameters: *common, ForkParameters: *fork_h, BenchmarkFinalParameters: *sizes}
+  - - {OperationType: GEMM, DataType: h, TransposeA: False, TransposeB: True, UseBeta: True, Batched: True}
+    - {BenchmarkCommonParameters: *common, ForkParameters: *fork_h, BenchmarkFinalParameters: *sizes}
+  - - {OperationType: GEMM, DataType: h, DestDataType: h, ComputeDataType: s, HighPrecisionAccumulate: True, TransposeA: False, TransposeB: False, UseBeta: True, Batched: True}
+    - {BenchmarkCommonParameters: *common, ForkParameters: *fork_h, BenchmarkFinalParameters: *sizes}
+  - - {OperationType: GEMM, DataType: h, DestDataType: h, ComputeDataType: s, HighPrecisionAccumulate: True, TransposeA: True, TransposeB: False, UseBeta: True, Batched: True}
+    - {BenchmarkCommonParameters: *common, ForkParameters: *fork_h, BenchmarkFinalParameters: *sizes}
+  - - {OperationType: GEMM, DataType: h, DestDataType: h, ComputeDataType: s, HighPrecisionAccumulate: True, TransposeA: False, TransposeB: True, UseBeta: True, Batched: True}
+    - {BenchmarkCommonParameters: *common, ForkParameters: *fork_h, BenchmarkFinalParameters: *sizes}
+  - - {OperationType: GEMM, DataType: s, TransposeA: False, TransposeB: False, UseBeta: True, Batched: True}
+    - {BenchmarkCommonParameters: *common, ForkParameters: *fork_s, BenchmarkFinalParameters: *sizes}
+  - - {OperationType: GEMM, DataType: s, TransposeA: True, TransposeB: False, UseBeta: True, Batched: True}
+    - {BenchmarkCommonParameters: *common, ForkParameters: *fork_s, BenchmarkFinalParameters: *sizes}
+  - - {OperationType: GEMM, DataType: s, TransposeA: False, TransposeB: True, UseBeta: True, Batched: True}
+    - {BenchmarkCommonParameters: *common, ForkParameters: *fork_s, BenchmarkFinalParameters: *sizes}
+
+LibraryLogic:
+  ScheduleName: "navi10"
+  ArchitectureName: "gfx1010"
+  DeviceNames: ["Device 731f"]
