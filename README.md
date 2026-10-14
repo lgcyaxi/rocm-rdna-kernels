@@ -17,3 +17,7 @@ Measured on an RX 5700 XT with the Tensile client (GPU time, result checked). ro
 PyTorch uses the 256x128x16 tile when M is at least 2048 and the sizes match that tile. Smaller multiples of 128 use 128x128x16. The direct launch of both tiles matched NumPy on this machine (max abs error about 1e-3 at 4096).
 
 The config used to generate the kernels is `configs/gfx1010_sgemm_nn.yaml`.
+
+## gfx1010 FP16 NN HGEMM
+
+`gfx1010/fp16_hgemm_nn/` is the same layout in fp16. Alpha is fp16. The winning tile is 256x128x16 at 1024, 2048, and 4096 (8.27 / 10.66 / 11.89 TFLOPS in the Tensile client). rocBLAS `torch.mm` on this card is about 4.1 to 4.5 TFLOPS. Global read width must be 8 for fp16.

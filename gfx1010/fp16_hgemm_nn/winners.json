@@ -1,0 +1,14 @@
+{
+  "arch": "gfx1010",
+  "op": "hgemm_nn",
+  "layout": "column_major_NN",
+  "beta": 0,
+  "alpha": "fp16",
+  "device": "RX 5700 XT",
+  "tile": {
+    "name": "Cij_Aik_Bkj_H_MT256x128x16_SN_K1_TT16_8",
+    "macro_tile": [256, 128, 16],
+    "workgroup": [256, 1, 1],
+    "gflops": {"1024": 8272.28, "2048": 10663.4, "4096": 11894.3}
+  }
+}
