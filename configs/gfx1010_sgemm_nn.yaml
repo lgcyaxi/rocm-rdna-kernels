@@ -1,0 +1,52 @@
+GlobalParameters:
+  MinimumRequiredVersion: 4.4.0
+  PrintLevel: 1
+  ForceRedoBenchmarkProblems: True
+  ForceRedoLibraryLogic: True
+  ForceRedoLibraryClient: True
+  CMakeBuildType: Release
+  EnqueuesPerSync: 1
+  SyncsPerBenchmark: 1
+  NumElementsToValidate: 128
+  ValidationMaxToPrint: 4
+  ShortNames: True
+  MergeFiles: True
+  Device: 0
+  KernelTime: True
+  PrintSolutionRejectionReason: True
+  PrintWinnersOnly: 1
+  CMakeGenerator: Ninja
+  Architecture: gfx1010
+
+BenchmarkProblems:
+  -
+    - OperationType: GEMM
+      DataType: s
+      TransposeA: False
+      TransposeB: False
+      UseBeta: False
+      Batched: False
+    - BenchmarkCommonParameters:
+        - KernelLanguage: ["Source"]
+        - EdgeType: ["ShiftPtr"]
+        - LoopTail: [True]
+      ForkParameters:
+        - ThreadTile:
+          - [8, 8]
+          - [16, 8]
+          - [8, 16]
+        - WorkGroup:
+          - [16, 16, 1]
+          - [16, 8, 1]
+        - DepthU: [16, 32]
+        - GlobalReadVectorWidth: [4]
+      BenchmarkFinalParameters:
+        - ProblemSizes:
+          - Exact: [1024, 1024, 1024]
+          - Exact: [2048, 2048, 2048]
+          - Exact: [4096, 4096, 4096]
+
+LibraryLogic:
+  ScheduleName: "navi10"
+  ArchitectureName: "gfx1010"
+  DeviceNames: ["Device 731f"]
