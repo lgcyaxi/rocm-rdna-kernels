@@ -35,3 +35,5 @@ python tools/pack_gfx1010_asm_gemm.py --clang <ROCm>/lib/llvm/bin/clang++ --tens
 ```
 
 The script copies the kernel sources into `gfx1010/asm_gemm/src/`, assembles and links them with Tensile's flags, and rewrites `hsaco.inc`.
+
+`tools/check_gfx1010_asm_gemm.py` checks the kernels through a PyTorch build that embeds `hsaco.inc`. It compares fp16 and fp32 `mm`, `addmm`, `bmm`, `baddbmm` and `nn.Linear` with a float64 CPU reference. Point `CUDA_VISIBLE_DEVICES` at an RX 5700 XT. `PYTORCH_GFX1010_HGEMM_FP16_ACC=1` also checks the fp16-accumulation kernels.
