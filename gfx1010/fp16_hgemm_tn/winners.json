@@ -1,0 +1,18 @@
+{
+  "arch": "gfx1010",
+  "op": "hgemm_tn",
+  "layout": "column_major_TN",
+  "beta": 0,
+  "alpha": "fp16",
+  "device": "RX 5700 XT",
+  "tile": {
+    "name": "Cij_Aki_Bkj_H_MT256x128x32_SN_K1_TT16_8",
+    "macro_tile": [256, 128, 32],
+    "workgroup": [256, 1, 1],
+    "gflops": {
+      "4096x2048x4096": 8641.35,
+      "4096x4096x4096_depth16": 9077.33
+    },
+    "torch_linear_tflops": {"batch_2048_features_4096": 7.91, "batch_4096_features_4096": 8.29}
+  }
+}
